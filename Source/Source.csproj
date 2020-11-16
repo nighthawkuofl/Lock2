@@ -89,13 +89,16 @@
         <Compile Include="Core\LockConfig.ConfigRulePrisoners.cs" />
         <Compile Include="Finder.cs" />
         <Compile Include="Core\LockConfig.ConfigRuleInverseColonists.cs" />
-        <Compile Include="Core\Windows\DefSelection_Window.cs" />
-        <Compile Include="Core\Windows\PawnSelection_Window.cs" />
-        <Compile Include="Core\Windows\RuleSelection_Window.cs" />
         <Compile Include="Core\LockConfig.ConfigRuleRace.cs" />
         <Compile Include="Core\LockConfig.ConfigRuleBedRoom.cs" />
         <Compile Include="Harmony\CompAssignableToPawn_Patch.cs" />
         <Compile Include="Harmony\Pawn_Ownership_Patch.cs" />
+        <Compile Include="Core\Selector_DefSelection.cs" />
+        <Compile Include="Core\Selector_PawnSelection.cs" />
+        <Compile Include="Core\Selector_RuleSelection.cs" />
+        <Compile Include="Core\ISelector.cs" />
+        <Compile Include="Harmony\Building_Bed_Patch.cs" />
+        <Compile Include="Harmony\PathFinder_Patch.cs" />
     </ItemGroup>
     <ItemGroup>
       <None Include="packages.config" />
@@ -105,7 +108,6 @@
     <ItemGroup>
       <Folder Include="Harmony\" />
       <Folder Include="Core\" />
-      <Folder Include="Core\Windows\" />
       <Folder Include="Harmony\Optimizations\" />
     </ItemGroup>
     <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

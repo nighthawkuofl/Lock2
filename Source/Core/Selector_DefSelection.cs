@@ -6,7 +6,7 @@ using Verse;
 
 namespace Locks2.Core
 {
-    public class DefSelection_Window : Window
+    public class Selector_DefSelection : ISelector
     {
         private Vector2 scrollPosition = Vector2.zero;
         private Rect viewRect = Rect.zero;
@@ -15,32 +15,32 @@ namespace Locks2.Core
         public IEnumerable<Def> defs;
         public Action<Def> onSelect;
 
-        public DefSelection_Window(IEnumerable<Def> defs, Action<Def> onSelect)
+        public Selector_DefSelection(IEnumerable<Def> defs, Action<Def> onSelect, bool integrated = false, Action closeAction = null) : base(integrated, closeAction)
         {
             this.defs = defs;
             this.onSelect = onSelect;
         }
 
-        public override void DoWindowContents(Rect inRect)
+        public override void FillContents(Listing_Standard standard, Rect inRect)
         {
-            var font = Text.Font;
-            var anchor = Text.Anchor;
             if (Find.Selector.selected.Count == 0)
             {
                 Close();
                 return;
             }
-            Listing_Standard standard = new Listing_Standard();
-            standard.Begin(inRect);
             {
                 var rect = standard.GetRect(30);
                 Text.Font = GameFont.Tiny;
-                var searchRect = new Rect(0, 0, rect.size.x, rect.size.y);
-                searchString = Widgets.TextField(searchRect, searchString).ToLower();
+                var searchRect = new Rect(0, 0, rect.width, 20);
+                if (Widgets.ButtonImage(searchRect.LeftPartPixels(20), TexButton.CloseXSmall))
+                {
+                    Close();
+                }
+                searchString = Widgets.TextField(new Rect(searchRect.position + new Vector2(25, 0), searchRect.size - new Vector2(55, 0)), searchString).ToLower();
             }
             {
                 standard.Gap(5);
-                var scrollRect = new Rect(inRect.position + new Vector2(0, 50), inRect.size - new Vector2(0, 75));
+                var scrollRect = new Rect(inRect.position + new Vector2(0, 50), inRect.size - new Vector2(0, 50));
                 var section = standard.BeginSection_NewTemp(scrollRect.height);
                 standard.EndSection(section);
                 standard.BeginScrollView(new Rect(scrollRect.position + new Vector2(5, 0), scrollRect.size - new Vector2(10, 10)), ref scrollPosition, ref viewRect);
@@ -60,13 +60,6 @@ namespace Locks2.Core
                 }
                 standard.EndScrollView(ref viewRect);
             }
-            standard.End();
-            if (Widgets.ButtonText(inRect.BottomPartPixels(30), "Locks2Close".Translate()))
-            {
-                Close();
-            }
-            Text.Font = font;
-            Text.Anchor = anchor;
         }
     }
 }

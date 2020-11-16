@@ -67,7 +67,7 @@ namespace Locks2.Core
                 return new ConfigRuleApparel() { enabled = enabled, apparelSet = new HashSet<ThingDef>(apparelSet) };
             }
 
-            public override void DoContent(IEnumerable<Pawn> pawns, Rect rect)
+            public override void DoContent(IEnumerable<Pawn> pawns, Rect rect, Action notifySelectionBegan, Action notifySelectionEnded)
             {
                 if (allApparel == null)
                 {
@@ -97,7 +97,8 @@ namespace Locks2.Core
                     if (Widgets.ButtonText(rowRect, "+"))
                     {
                         Find.CurrentMap.reachability.ClearCache();
-                        DoExtraContent((def) => apparelSet.Add(def), allApparel.Where(def => !apparelSet.Contains(def)));
+                        notifySelectionBegan.Invoke();
+                        DoExtraContent((def) => apparelSet.Add(def), allApparel.Where(def => !apparelSet.Contains(def)), notifySelectionEnded);
                     }
                 }
             }
@@ -108,13 +109,13 @@ namespace Locks2.Core
                 Scribe_Collections.Look(ref apparelSet, "apparelSet", LookMode.Def);
             }
 
-            private void DoExtraContent(Action<ThingDef> onSelection, IEnumerable<ThingDef> defs)
+            private void DoExtraContent(Action<ThingDef> onSelection, IEnumerable<ThingDef> defs, Action notifySelectionEnded)
             {
-                Find.WindowStack.Add(new DefSelection_Window(defs, (def) =>
-                {
-                    Find.CurrentMap.reachability.ClearCache();
-                    onSelection(def as ThingDef);
-                }));
+                ITab_Lock.currentSelector = new Selector_DefSelection(defs, (def) =>
+                 {
+                     Find.CurrentMap.reachability.ClearCache();
+                     onSelection(def as ThingDef);
+                 }, true, notifySelectionEnded);
             }
         }
     }

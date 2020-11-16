@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -12,7 +13,7 @@ namespace Locks2.Core
         {
             public bool enabled = true;
 
-            public override float Height => 54;
+            public override float Height => 64;
 
             public override bool Allows(Pawn pawn)
             {
@@ -59,13 +60,13 @@ namespace Locks2.Core
                 return false;
             }
 
-            public override void DoContent(IEnumerable<Pawn> pawns, Rect rect)
+            public override void DoContent(IEnumerable<Pawn> pawns, Rect rect, Action notifySelectionBegan, Action notifySelectionEnded)
             {
                 var before = enabled;
                 Widgets.CheckboxLabeled(rect.TopPartPixels(25), "Locks2BedRoomFilter".Translate(), ref enabled);
                 var font = Text.Font;
                 Text.Font = GameFont.Tiny;
-                Widgets.Label(rect.BottomPartPixels(25), "Locks2BedRoomFilterHint".Translate());
+                Widgets.Label(rect.BottomPartPixels(35), "Locks2BedRoomFilterHint".Translate());
                 if (before != enabled)
                 {
                     Find.CurrentMap.reachability.ClearCache();

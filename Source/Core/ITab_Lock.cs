@@ -21,11 +21,16 @@ namespace Locks2.Core
         private Rect viewRect = Rect.zero;
         private Vector2 scrollPosition = Vector2.zero;
         private HashSet<IConfigRule> removalSet = new HashSet<IConfigRule>();
+        private bool expanded = false;
+        private IConfigRule expandedRule;
 
         private static LockConfig currentClip;
         private static readonly Vector2 offset = new Vector2(0, 25);
 
-        public static Rect tabRect;
+        public static ISelector currentSelector;
+        public static Listing_Standard currentRightStandard;
+        public static Rect currentRightRect;
+
 
         public float PawnSectionHeight
         {
@@ -39,8 +44,6 @@ namespace Locks2.Core
                 return height + 100 + 54 * config.rules.Count + 30;
             }
         }
-
-
 
         public IEnumerable<Pawn> Pawns
         {
@@ -66,14 +69,17 @@ namespace Locks2.Core
             base.OnOpen();
             this.door = SelThing as Building;
             this.config = door.GetConfig();
+            ResetRightPanel();
         }
 
         public override void CloseTab()
         {
             base.CloseTab();
             var map = SelThing.Map;
+            currentSelector = null;
             map.reachability.ClearCache();
             config.Dirty();
+            ResetRightPanel();
         }
 
         public override void UpdateSize()
@@ -82,21 +88,35 @@ namespace Locks2.Core
             size = new Vector2(Finder.settings.tabSizeX, Finder.settings.tabSizeY);
             inRect = new Rect(offset, size - offset);
             inRect = inRect.ContractedBy(5);
+            if (expanded)
+            {
+                size.x *= 2;
+            }
+            currentRightRect = new Rect(inRect.position + new Vector2(inRect.width, 0), Vector2.zero);
+            if (expanded)
+            {
+                currentRightRect = new Rect(inRect.position + new Vector2(inRect.width + 10, 0), inRect.size - new Vector2(5, 0));
+            }
         }
 
         public override void FillTab()
         {
             this.UpdateSize();
+            if (!expanded)
+            {
+                ResetRightPanel();
+            }
             if (SelThing is Building temp && (temp.GetConfig() != config || !Find.Selector.selected.Contains(door)))
             {
                 CloseTab();
+                ResetRightPanel();
                 foreach (Window window in Find.WindowStack.windows)
                 {
                     var type = window.GetType();
                     if (false
-                        || type == typeof(DefSelection_Window)
-                        || type == typeof(PawnSelection_Window)
-                        || type == typeof(RuleSelection_Window))
+                        || type == typeof(Selector_DefSelection)
+                        || type == typeof(Selector_PawnSelection)
+                        || type == typeof(Selector_RuleSelection))
                     {
                         window.Close(doCloseSound: true);
                     }
@@ -122,11 +142,13 @@ namespace Locks2.Core
                 Widgets.Label(rect, "Locks2DoorSettings".Translate());
                 if (Widgets.ButtonImageFitted(rect.RightPartPixels(18), TexButton.Plus))
                 {
-                    Find.WindowStack.Add(new RuleSelection_Window((rule) => config.rules.Add(rule)));
-                    Find.CurrentMap.reachability.ClearCache();
+                    ResetRightPanel();
+                    expanded = true;
+                    ITab_Lock.currentSelector = new Selector_RuleSelection((rule) => config.rules.Add(rule), true, () => { expanded = false; });
                 }
                 if (Widgets.ButtonImageFitted(rect.RightPartPixels(36).LeftPartPixels(18), TexButton.Copy))
                 {
+                    ResetRightPanel();
                     Finder.clip = config;
                     currentClip = config;
                 }
@@ -146,6 +168,15 @@ namespace Locks2.Core
                 standard.EndScrollView(ref viewRect);
                 standard.End();
             }
+            {
+                currentRightStandard = new Listing_Standard();
+                currentRightStandard.Begin(currentRightRect);
+                if (expanded && currentSelector != null)
+                {
+                    currentSelector.DoIntegratedContents(currentRightRect, currentRightStandard);
+                }
+                currentRightStandard.End();
+            }
         }
 
         private void FillRules(Listing_Standard standard)
@@ -154,6 +185,7 @@ namespace Locks2.Core
             var moveUp = false;
             var moveDown = false;
             removalSet.Clear();
+
             if (Finder.debug)
             {
                 standard.Gap(5);
@@ -180,9 +212,22 @@ namespace Locks2.Core
                     if (Widgets.ButtonImageFitted(leftPart.TopPartPixels(36).BottomPartPixels(18), TexButton.Minus))
                     {
                         removalSet.Add(rule);
+                        ResetRightPanel();
                         Find.CurrentMap.reachability.ClearCache();
                     }
-                    rule.DoContent(Pawns, rect.RightPart(0.90f));
+                    rule.DoContent(Pawns, rect.RightPart(0.90f), () =>
+                    {
+                        expanded = true;
+                        expandedRule = rule;
+                    }, () =>
+                    {
+                        expanded = false;
+                        ResetRightPanel();
+                    });
+                    if (expandedRule != null && rule != expandedRule)
+                    {
+                        Widgets.DrawBoxSolid(rect, new Color(0, 0, 0, 0.4f));
+                    }
                 }, Mathf.Max(rule.Height, 54));
                 if (moveUp || moveDown) break;
                 counter++;
@@ -226,6 +271,13 @@ namespace Locks2.Core
             standard.EndSection(row_standard);
             Text.Font = font;
             Text.Anchor = anchor;
+        }
+
+        private void ResetRightPanel()
+        {
+            currentSelector = null;
+            expanded = false;
+            expandedRule = null;
         }
 
         private void FillDebuggingInfo(Listing_Standard standard)

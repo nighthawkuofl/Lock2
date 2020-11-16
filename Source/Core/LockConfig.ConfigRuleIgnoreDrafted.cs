@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
@@ -21,7 +22,7 @@ namespace Locks2.Core
                 return false;
             }
 
-            public override void DoContent(IEnumerable<Pawn> pawns, Rect rect)
+            public override void DoContent(IEnumerable<Pawn> pawns, Rect rect, Action notifySelectionBegan, Action notifySelectionEnded)
             {
                 var before = enabled;
                 Widgets.CheckboxLabeled(rect, "Locks2DraftedPawns".Translate(), ref enabled);

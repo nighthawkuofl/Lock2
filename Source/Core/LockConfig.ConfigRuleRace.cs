@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -31,7 +32,7 @@ namespace Locks2.Core
                 return new ConfigRuleRace() { enabled = enabled, whiteSet = new HashSet<ThingDef>(whiteSet) };
             }
 
-            public override void DoContent(IEnumerable<Pawn> pawns, Rect rect)
+            public override void DoContent(IEnumerable<Pawn> pawns, Rect rect, Action notifySelectionBegan, Action notifySelectionEnded)
             {
                 if (racesDefs == null)
                 {
@@ -62,11 +63,12 @@ namespace Locks2.Core
                     if (Widgets.ButtonText(rowRect, "+"))
                     {
                         Find.CurrentMap.reachability.ClearCache();
+                        notifySelectionBegan();
                         DoExtraContent((def) =>
                         {
                             whiteSet.Add(def as ThingDef);
                             Find.CurrentMap.reachability.ClearCache();
-                        }, racesDefs.Where(def => !whiteSet.Contains(def)));
+                        }, racesDefs.Where(def => !whiteSet.Contains(def)), notifySelectionEnded);
                     }
                 }
             }
@@ -81,9 +83,9 @@ namespace Locks2.Core
                 }
             }
 
-            private void DoExtraContent(Action<Def> onSelection, IEnumerable<ThingDef> defs)
+            private void DoExtraContent(Action<Def> onSelection, IEnumerable<ThingDef> defs, Action notifySelectionEnded)
             {
-                Find.WindowStack.Add(new DefSelection_Window(defs, onSelection));
+                ITab_Lock.currentSelector = new Selector_DefSelection(defs, onSelection, true, notifySelectionEnded);
             }
         }
     }

@@ -77,7 +77,7 @@ namespace Locks2
                     }
                     if (settings.defaultRules.Count <= 4 && section.ButtonText("+"))
                     {
-                        Find.WindowStack.Add(new RuleSelection_Window((rule) => settings.defaultRules.Add(rule.GetType())));
+                        Find.WindowStack.Add(new Selector_RuleSelection((rule) => settings.defaultRules.Add(rule.GetType())));
                     }
                     section.EndSection(section);
                 }

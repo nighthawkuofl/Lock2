@@ -11,7 +11,22 @@ namespace Locks2.Core
         public Thing door;
         public List<IConfigRule> rules;
 
+        private static List<LockConfig> configs = new List<LockConfig>();
+
         private Dictionary<int, Pair<bool, int>> cache = new Dictionary<int, Pair<bool, int>>(100);
+
+        public LockConfig()
+        {
+            configs.Add(this);
+        }
+
+        public static void Notify_Dirty()
+        {
+            foreach (var config in configs)
+            {
+                config.cache.Clear();
+            }
+        }
 
         public bool Allows(Pawn pawn)
         {
@@ -49,7 +64,7 @@ namespace Locks2.Core
             public abstract float Height { get; }
             public abstract bool Allows(Pawn pawn);
             public abstract void ExposeData();
-            public abstract void DoContent(IEnumerable<Pawn> pawns, Rect rect);
+            public abstract void DoContent(IEnumerable<Pawn> pawns, Rect rect, Action notifySelectionBegan, Action notifySelectionEnded);
             public abstract IConfigRule Duplicate();
         }
 

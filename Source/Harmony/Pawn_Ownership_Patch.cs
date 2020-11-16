@@ -1,5 +1,6 @@
 ﻿using System;
 using HarmonyLib;
+using Locks2.Core;
 using RimWorld;
 
 namespace Locks2.Harmony
@@ -10,6 +11,7 @@ namespace Locks2.Harmony
         public static void Prefix(Pawn_Ownership __instance)
         {
             __instance?.pawn?.Map?.reachability?.ClearCache();
+            LockConfig.Notify_Dirty();
         }
     }
 
@@ -19,6 +21,7 @@ namespace Locks2.Harmony
         public static void Prefix(Pawn_Ownership __instance)
         {
             __instance?.pawn?.Map?.reachability?.ClearCache();
+            LockConfig.Notify_Dirty();
         }
     }
 }

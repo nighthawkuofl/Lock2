@@ -42,7 +42,7 @@ namespace Locks2.Core
                 return false;
             }
 
-            public override void DoContent(IEnumerable<Pawn> pawns, Rect rect)
+            public override void DoContent(IEnumerable<Pawn> pawns, Rect rect, Action notifySelectionBegan, Action notifySelectionEnded)
             {
                 Text.Font = GameFont.Small;
                 Widgets.CheckboxLabeled(rect.TopPartPixels(25), "Locks2GameConditionFilter".Translate(), ref enabled);
@@ -69,24 +69,25 @@ namespace Locks2.Core
                     if (Widgets.ButtonText(rowRect, "+"))
                     {
                         Find.CurrentMap.reachability.ClearCache();
+                        notifySelectionBegan();
                         DoExtraContent((def) =>
                         {
                             conditionsSet.Add(def);
                             Find.CurrentMap.reachability.ClearCache();
-                        }, DefDatabase<GameConditionDef>.AllDefs.Where(def => !conditionsSet.Contains(def)));
+                        }, DefDatabase<GameConditionDef>.AllDefs.Where(def => !conditionsSet.Contains(def)), notifySelectionEnded);
                     }
                 }
-            }
-
-            private void DoExtraContent(Action<GameConditionDef> onSelection, IEnumerable<GameConditionDef> conditions)
-            {
-                Find.WindowStack.Add(new DefSelection_Window(conditions, (def) => onSelection(def as GameConditionDef)));
             }
 
             public override void ExposeData()
             {
                 Scribe_Values.Look(ref enabled, "enabled", true);
                 Scribe_Collections.Look(ref conditionsSet, "conditionsSet", LookMode.Def);
+            }
+
+            private void DoExtraContent(Action<GameConditionDef> onSelection, IEnumerable<GameConditionDef> conditions, Action notifySelectionEnded)
+            {
+                ITab_Lock.currentSelector = new Selector_DefSelection(conditions, (def) => onSelection(def as GameConditionDef), true, notifySelectionEnded);
             }
         }
     }

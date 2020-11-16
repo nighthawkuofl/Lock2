@@ -1,5 +1,6 @@
 ﻿using System;
 using HarmonyLib;
+using Locks2.Core;
 using RimWorld;
 
 namespace Locks2.Harmony
@@ -12,6 +13,7 @@ namespace Locks2.Harmony
             if (__instance?.parent?.def?.IsBed ?? false)
             {
                 __instance.parent.Map?.reachability?.ClearCache();
+                LockConfig.Notify_Dirty();
             }
         }
     }
@@ -24,6 +26,7 @@ namespace Locks2.Harmony
             if (__instance?.parent?.def?.IsBed ?? false)
             {
                 __instance.parent.Map?.reachability?.ClearCache();
+                LockConfig.Notify_Dirty();
             }
         }
     }
@@ -36,6 +39,7 @@ namespace Locks2.Harmony
             if (__instance?.parent?.def?.IsBed ?? false)
             {
                 __instance.parent.Map?.reachability?.ClearCache();
+                LockConfig.Notify_Dirty();
             }
         }
     }
@@ -48,6 +52,7 @@ namespace Locks2.Harmony
             if (__instance?.parent?.def?.IsBed ?? false)
             {
                 __instance.parent.Map?.reachability?.ClearCache();
+                LockConfig.Notify_Dirty();
             }
         }
     }

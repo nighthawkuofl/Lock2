@@ -31,7 +31,7 @@ namespace Locks2.Core
                 return new ConfigRuleInverseColonists() { enabled = enabled, whiteSet = new HashSet<Pawn>(whiteSet) };
             }
 
-            public override void DoContent(IEnumerable<Pawn> pawns, Rect rect)
+            public override void DoContent(IEnumerable<Pawn> pawns, Rect rect, Action notifySelectionBegan, Action notifySelectionEnded)
             {
                 Text.Font = GameFont.Small;
                 Widgets.CheckboxLabeled(rect.TopPartPixels(25), "Locks2ColonistInvertedFilter".Translate(), ref enabled);
@@ -58,11 +58,12 @@ namespace Locks2.Core
                     if (Widgets.ButtonText(rowRect, "+"))
                     {
                         Find.CurrentMap.reachability.ClearCache();
+                        notifySelectionBegan();
                         DoExtraContent((p) =>
                         {
                             whiteSet.Add(p);
                             Find.CurrentMap.reachability.ClearCache();
-                        }, pawns.Where(p => !whiteSet.Contains(p)));
+                        }, pawns.Where(p => !whiteSet.Contains(p)), notifySelectionEnded);
                     }
                 }
             }
@@ -81,9 +82,9 @@ namespace Locks2.Core
                 }
             }
 
-            private void DoExtraContent(Action<Pawn> onSelection, IEnumerable<Pawn> pawns)
+            private void DoExtraContent(Action<Pawn> onSelection, IEnumerable<Pawn> pawns, Action notifySelectionEnded)
             {
-                Find.WindowStack.Add(new PawnSelection_Window(pawns, onSelection));
+                ITab_Lock.currentSelector = new Selector_PawnSelection(pawns, onSelection, true, notifySelectionEnded);
             }
         }
     }
